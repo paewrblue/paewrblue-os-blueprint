@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paewrblue OS — System Blueprint | Paewrblue Research</title>
+<style>
+  /* No external assets — system font stack only, so this artifact stays fully self-contained (per the no-CDN artifact rule). */
+  :root{
+    /* matched to the liquidity dashboard theme (src/theme.js) */
+    --bg:#f7fbff; --panel:#ffffff; --panel2:#f4f8ff; --ink:#172033; --sub:#526173; --muted:#7b8796;
+    --line:#dce7f4; --accent:#246bfe; --teal:#009b9b; --amber:#c08a00; --red:#ef3340;
+    --green:#13a05f; --purple:#6f45d6; --pink:#c0457f; --cyan:#0e8aa8; --orange:#df6126;
+    /* layer accents (all drawn from the dashboard palette) */
+    --L1:#009b9b; --L2:#c08a00; --L3:#6f45d6; --L4:#246bfe; --L5:#13a05f; --L6:#df6126;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:linear-gradient(180deg,#ffffff 0%,var(--bg) 340px);color:var(--ink);
+    font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 80px}
+  h1{font-size:32px;margin:0 0 4px;letter-spacing:-.5px;color:#073362}
+  h2{font-size:20px;margin:46px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px}
+  h2 .n{font-size:13px;color:#fff;background:var(--accent);border-radius:7px;
+    width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+  p{margin:10px 0}
+  a{color:var(--accent)}
+  code{font-family:'JetBrains Mono',monospace;background:#f3f8ff;border:1px solid #e2ebf6;
+    padding:1px 5px;border-radius:5px;font-size:.92em;color:#0b3a73}
+  .sub{color:var(--muted);font-size:13px;margin-top:0}
+  .mono{font-family:'JetBrains Mono',monospace}
+  /* hero */
+  .hero{background:linear-gradient(145deg,rgba(0,155,155,.08),rgba(36,107,254,.07) 55%,#ffffff);
+    border:1px solid var(--line);box-shadow:0 1px 2px rgba(20,39,66,.06);
+    border-radius:16px;padding:26px;margin-top:18px;position:relative;overflow:hidden}
+  .hero:before{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;
+    background:radial-gradient(circle,rgba(36,107,254,.10),transparent 70%);}
+  .hero:after{content:"";position:absolute;left:-50px;bottom:-70px;width:240px;height:240px;
+    background:radial-gradient(circle,rgba(0,155,155,.10),transparent 70%);}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;position:relative}
+  .pill{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:118px}
+  .pill .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .pill .v{font-size:20px;font-weight:800;margin-top:2px}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid}
+  .b-teal{color:var(--teal);border-color:rgba(0,155,155,.30);background:rgba(0,155,155,.08)}
+  .b-amber{color:var(--amber);border-color:rgba(192,138,0,.30);background:rgba(192,138,0,.08)}
+  .b-blue{color:var(--accent);border-color:rgba(36,107,254,.4);background:rgba(36,107,254,.10)}
+  /* core loop ring */
+  .loop{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:18px 0 4px}
+  .node{flex:1;min-width:118px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+    padding:13px 10px;text-align:center;position:relative}
+  .node .ic{font-size:18px}
+  .node .t{font-weight:700;margin-top:4px;font-size:13.5px}
+  .node .d{font-size:11px;color:var(--muted);margin-top:2px}
+  .node.hl{border-color:rgba(36,107,254,.55);background:rgba(36,107,254,.08)}
+  .arrow{align-self:center;color:var(--accent);font-size:20px;padding:0 6px;flex:0 0 auto}
+  .loopback{text-align:center;color:var(--muted);font-size:12px;margin-top:6px}
+  .loopback b{color:var(--teal)}
+  /* layered stack */
+  .layer{border:1px solid var(--line);border-left:5px solid var(--lc,var(--accent));border-radius:14px;
+    background:var(--panel);padding:16px 18px;margin:0}
+  .layer .lh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .layer .lh .lt{font-size:16px;font-weight:800;color:var(--lc,var(--accent))}
+  .layer .lh .ls{font-size:12px;color:var(--muted)}
+  .layer .lh .lnum{font:700 11px/1 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#fff;background:var(--lc,var(--accent));
+    border-radius:6px;padding:4px 7px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12.5px}
+  .chip b{color:var(--ink)}
+  .chip .sm{color:var(--muted);font-size:11px}
+  .cgroup{margin:8px 0}
+  .cgroup .gl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:0 0 5px}
+  .flow{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px 0}
+  .flow .dn{color:var(--muted);font-size:22px;line-height:1}
+  .flow .fl{font-size:11px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);
+    border-radius:999px;padding:2px 12px}
+  /* zoom panels */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+  .panel h3{margin:0 0 12px;font-size:14px;color:var(--teal);text-transform:uppercase;letter-spacing:.5px}
+  /* procurement 3-layer */
+  .tri{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .tri .col{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--panel2)}
+  .tri .col .tag{font:700 10px/1 'JetBrains Mono',ui-monospace,Menlo,monospace;padding:3px 7px;border-radius:6px;color:#fff}
+  .tri .col h4{margin:8px 0 4px;font-size:13.5px}
+  .tri .col p{margin:4px 0;font-size:12px;color:var(--muted)}
+  .tri .col .lat{font-size:11px;font-weight:700;margin-top:6px}
+  .fuse{display:flex;flex-direction:column;align-items:center;margin-top:10px}
+  .fuse .dn{color:var(--muted);font-size:22px}
+  .fuse .box{border:1px dashed rgba(36,107,254,.5);background:rgba(36,107,254,.07);border-radius:12px;
+    padding:12px 16px;text-align:center;width:100%}
+  .fuse .box b{color:var(--accent)}
+  .fuse .out{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;justify-content:center}
+  .fuse .out .o{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 14px;font-size:12.5px}
+  /* gate pipeline */
+  .gates{display:flex;flex-wrap:wrap;gap:0;align-items:stretch}
+  .gate{flex:1;min-width:96px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 8px;text-align:center}
+  .gate .g{font:700 10px/1 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#fff;background:var(--amber);
+    border-radius:6px;padding:3px 6px;display:inline-block}
+  .gate .gt{font-weight:700;font-size:12.5px;margin-top:6px}
+  .gate .gd{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .gate .ga{align-self:center}
+  .garrow{align-self:center;color:var(--amber);font-size:16px;padding:0 3px}
+  /* timeline rail */
+  .rail{position:relative;margin:6px 0 0;padding-left:8px}
+  .row{display:grid;grid-template-columns:70px 14px 1fr;gap:10px;align-items:start;padding:7px 0;
+    border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .row .tm{font:700 13px/1.3 'JetBrains Mono',ui-monospace,Menlo,monospace;color:var(--ink);text-align:right;padding-top:1px}
+  .row .dot{position:relative;height:100%}
+  .row .dot:before{content:"";position:absolute;left:4px;top:5px;width:8px;height:8px;border-radius:50%;
+    background:var(--dc,var(--accent));box-shadow:0 0 0 3px rgba(36,107,254,.15)}
+  .row .dot:after{content:"";position:absolute;left:7px;top:13px;bottom:-14px;width:2px;background:var(--line)}
+  .row:last-child .dot:after{display:none}
+  .row .ev{font-size:13px}
+  .row .ev .n{font-weight:700}
+  .row .ev .m{color:var(--muted);font-size:11.5px}
+  .tk{font:600 10px/1 'JetBrains Mono',ui-monospace,Menlo,monospace;padding:2px 6px;border-radius:5px;margin-left:6px;color:#fff}
+  .tk-brief{background:var(--accent)} .tk-proc{background:var(--amber)} .tk-ins{background:var(--purple)}
+  .tk-sig{background:var(--teal)} .tk-alert{background:var(--red)} .tk-sys{background:var(--muted)}
+  /* tables */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  td code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
+  /* misc */
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:14px 0 0}
+  .legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  /* improvements */
+  .imps{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  .imp{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;
+    border-top:3px solid var(--pc,var(--accent))}
+  .imp .ih{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .imp .ttl{font-weight:800;font-size:14.5px}
+  .imp .pr{font:700 9.5px/1 'JetBrains Mono',ui-monospace,Menlo,monospace;padding:3px 7px;border-radius:6px;color:#fff;white-space:nowrap}
+  .imp .where{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+  .imp .wl{font:600 10px/1 'JetBrains Mono',ui-monospace,Menlo,monospace;background:var(--panel2);border:1px solid var(--line);
+    border-radius:5px;padding:3px 6px;color:var(--muted)}
+  .imp .lab2{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:9px 0 1px;font-weight:700}
+  .imp .gap{font-size:12.5px;margin:1px 0}
+  .imp .pay{font-size:12.5px;margin:3px 0 0;color:var(--green)}
+  .also{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:6px;font-size:12.5px}
+  .also b{color:var(--ink)}
+  .foot{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+  @media(max-width:720px){.tri{grid-template-columns:1fr}.two{grid-template-columns:1fr}.imps{grid-template-columns:1fr}}
+  @media print{body{background:#fff}.wrap{max-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="sub">PAEWRBLUE RESEARCH · SYSTEM BLUEPRINT · 2026-06-25 · rev 2026-07-06</p>
+  <div class="hero">
+    <h1>Paewrblue OS — The Whole Machine</h1>
+    <p class="sub">A personal investment operating system · Bangkok (UTC+7) · US · Canada · Australia · Thailand (SET)</p>
+    <div class="pills">
+      <div class="pill"><div class="k">Automation scripts</div><div class="v">~80</div></div>
+      <div class="pill"><div class="k">launchd jobs</div><div class="v">14</div></div>
+      <div class="pill"><div class="k">NLM notebooks</div><div class="v">25</div></div>
+      <div class="pill"><div class="k">NLM sources</div><div class="v">1,100+</div></div>
+      <div class="pill"><div class="k">Dashboard tabs</div><div class="v">15</div></div>
+      <div class="pill"><div class="k">API endpoints</div><div class="v">30+</div></div>
+      <div class="pill"><div class="k">Target</div><div class="v" style="font-size:15px">2–3x · 1–2 yr</div></div>
+    </div>
+    <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;position:relative">
+      <span class="badge b-blue">Idea → Dossier → Decision pipeline</span>
+      <span class="badge b-amber">Self-running data machine</span>
+      <span class="badge b-teal">NotebookLM-first knowledge layer</span>
+    </div>
+  </div>
+
+  <!-- ============ THE CORE LOOP ============ -->
+  <h2><span class="n">●</span> The Core Loop — how one idea becomes a position</h2>
+  <p>Every company runs the same conveyor. This is the heartbeat the rest of the system feeds and serves.</p>
+  <div class="loop">
+    <div class="node"><div class="ic">💡</div><div class="t">Idea</div><div class="d">screen · feed · radar</div></div>
+    <div class="arrow">→</div>
+    <div class="node hl"><div class="ic">🔬</div><div class="t">/analyze</div><div class="d">8-step pipeline</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="ic">📄</div><div class="t">Dossier</div><div class="d">18-section report</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="ic">☁️</div><div class="t">Drive</div><div class="d">sector folder</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="ic">📓</div><div class="t">NotebookLM</div><div class="d">+ blind-spot sweep</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="ic">🗂️</div><div class="t">Index</div><div class="d">research_index.md</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="ic">🎯</div><div class="t">Watchlist</div><div class="d">entry zone · catalyst</div></div>
+  </div>
+  <p class="loopback">↻ <b>Watchlist</b> → /decision gate → trade → portfolio → /update on earnings → <b>loops back into the dossier</b></p>
+
+  <!-- ============ LAYERED ARCHITECTURE ============ -->
+  <h2><span class="n">▦</span> The Six Layers — top is raw signal, bottom is what you act on</h2>
+
+  <div class="layer" style="--lc:var(--L1)">
+    <div class="lh"><span class="lnum">L1</span><span class="lt">External Data Sources</span><span class="ls">the raw world — prices, filings, contracts, crowd</span></div>
+    <div class="chips">
+      <span class="chip"><b>Yahoo Finance</b> <span class="sm">prices · fundamentals</span></span>
+      <span class="chip"><b>FRED</b> <span class="sm">Fed BS · RRP · TGA · yields</span></span>
+      <span class="chip"><b>SET / iDisc</b> <span class="sm">Thai filings · factsheets</span></span>
+      <span class="chip"><b>Thai MOC</b> <span class="sm">HS-code exports</span></span>
+      <span class="chip"><b>Official e-GP</b> <span class="sm">Turnstile-gated winners</span></span>
+      <span class="chip"><b>govspending</b> <span class="sm">authoritative ~7wk lag</span></span>
+      <span class="chip"><b>OpenInsider</b> <span class="sm">US Form 4</span></span>
+      <span class="chip"><b>Dataroma</b> <span class="sm">superinvestors</span></span>
+      <span class="chip"><b>SEC iDisc</b> <span class="sm">Form 59 · 246-2</span></span>
+      <span class="chip"><b>ThaiVI board</b> <span class="sm">crowd calls</span></span>
+      <span class="chip"><b>Google News RSS</b> <span class="sm">award news</span></span>
+    </div>
+  </div>
+
+  <div class="flow"><span class="dn">▼</span><span class="fl">pulled on a schedule by</span><span class="dn">▼</span></div>
+
+  <div class="layer" style="--lc:var(--L2)">
+    <div class="lh"><span class="lnum">L2</span><span class="lt">Automation / Pipeline</span><span class="ls">~80 scripts · 14 launchd jobs · all times Bangkok</span></div>
+    <div class="cgroup"><div class="gl">Daily intelligence</div><div class="chips">
+      <span class="chip"><b>smart_money.py</b> <span class="sm">06:30 · US insiders</span></span>
+      <span class="chip"><b>thaivi_refresh.sh</b> <span class="sm">08:40 · crowd signal</span></span>
+      <span class="chip"><b>morning_brief.py</b> <span class="sm">09:00 / 13:00 / 18:00</span></span>
+      <span class="chip"><b>insider_daily.sh</b> <span class="sm">18:00 · Form 59/246-2</span></span>
+      <span class="chip"><b>zone_alerts.py</b> <span class="sm">hourly · band crosses</span></span>
+    </div></div>
+    <div class="cgroup"><div class="gl">Procurement harvest</div><div class="chips">
+      <span class="chip"><b>gman_egp.sh</b> <span class="sm">09:00 & 17:00 · Chrome</span></span>
+      <span class="chip"><b>run_procurement_pipeline.sh</b> <span class="sm">4×/day</span></span>
+      <span class="chip"><b>gprocurement_feed.py</b> <span class="sm">17:30 · API backfill</span></span>
+      <span class="chip"><b>set_award_news_feed.py</b> <span class="sm">17:35 · RSS</span></span>
+      <span class="chip"><b>procurement_store.py</b> <span class="sm">SQLite unifier</span></span>
+    </div></div>
+    <div class="cgroup"><div class="gl">Research ops &amp; hygiene</div><div class="chips">
+      <span class="chip"><b>nlm_sync.py</b> <span class="sm">sync + blind-spot sweep</span></span>
+      <span class="chip"><b>upload_to_drive.py</b></span>
+      <span class="chip"><b>minervini_check.py</b> <span class="sm">trend template</span></span>
+      <span class="chip"><b>library_digest.py</b> <span class="sm">Sun catchup</span></span>
+      <span class="chip"><b>doctor.py</b> <span class="sm">consistency check</span></span>
+      <span class="chip"><b>obsidian_price_refresh.py</b> <span class="sm">08:40 · live cockpit prices</span></span>
+      <span class="chip"><b>decision_outcomes.py</b> <span class="sm">hit-rate + alpha scorecard</span></span>
+      <span class="chip"><b>belief_checkpoints.py</b> <span class="sm">claim horizons</span></span>
+    </div></div>
+  </div>
+
+  <div class="flow"><span class="dn">▼</span><span class="fl">writes &amp; reads</span><span class="dn">▲</span></div>
+
+  <div class="layer" style="--lc:var(--L3)">
+    <div class="lh"><span class="lnum">L3</span><span class="lt">Memory / Knowledge Base</span><span class="ls">the single source of truth — half human-curated, half machine-written</span></div>
+    <div class="two">
+      <div>
+        <div class="gl" style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px">Curated markdown (you + Claude)</div>
+        <div class="chips">
+          <span class="chip"><b>research_index.md</b></span>
+          <span class="chip"><b>watchlist.md</b></span>
+          <span class="chip"><b>thesis_monitor.md</b></span>
+          <span class="chip"><b>portfolio.md</b></span>
+          <span class="chip"><b>decision_journal.md</b></span>
+          <span class="chip"><b>mistake_log.md</b></span>
+          <span class="chip"><b>earnings/macro calendars</b></span>
+          <span class="chip"><b>playbooks + frameworks</b></span>
+          <span class="chip"><b>beliefs/*.md</b> <span class="sm">3 belief files · dated falsifiable claims</span></span>
+          <span class="chip"><b>expert_ledger.md</b> <span class="sm">12 narrators rated</span></span>
+          <span class="chip"><b>edge_log.md</b> <span class="sm">7 codified edges</span></span>
+        </div>
+      </div>
+      <div>
+        <div class="gl" style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px">Machine JSON feeds (scripts)</div>
+        <div class="chips">
+          <span class="chip"><b>procurement_events.db</b></span>
+          <span class="chip"><b>smart_money.json</b></span>
+          <span class="chip"><b>thai_insider.json</b></span>
+          <span class="chip"><b>minervini_cache.json</b></span>
+          <span class="chip"><b>thaivi_backtest/*</b></span>
+          <span class="chip"><b>insider_flow.json</b></span>
+          <span class="chip"><b>zone_alert_state.json</b></span>
+          <span class="chip"><b>*_industry_map.json</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow"><span class="dn">▼</span><span class="fl">fuels the judgment layer</span><span class="dn">▼</span></div>
+
+  <div class="layer" style="--lc:var(--L4)">
+    <div class="lh"><span class="lnum">L4</span><span class="lt">Analysis Workflow</span><span class="ls">skills + slash commands — the disciplined human/Claude reasoning</span></div>
+    <div class="chips">
+      <span class="chip"><b>/analyze</b> <span class="sm">full 18-section dossier</span></span>
+      <span class="chip"><b>/update</b> <span class="sm">delta on earnings/news</span></span>
+      <span class="chip"><b>/minervini</b> <span class="sm">stage + VCP</span></span>
+      <span class="chip"><b>/challenge</b> <span class="sm">short-seller bear case</span></span>
+      <span class="chip"><b>/decision</b> <span class="sm">pre-trade gate</span></span>
+      <span class="chip"><b>/thaisheet</b> <span class="sm">Thai deep financials</span></span>
+      <span class="chip"><b>/digest</b> <span class="sm">doc → belief file + claims</span></span>
+      <span class="chip"><b>/portfolio</b> · <b>/watchlist</b> · <b>/report</b> · <b>/slides</b></span>
+    </div>
+    <p style="margin:12px 0 0;font-size:12.5px;color:var(--muted)">⚙ Governed by the <b style="color:var(--accent)">NotebookLM-first rule</b> (query notebooks before any web search) and the <b style="color:var(--amber)">7-gate discipline</b> — see zoom-in below.</p>
+  </div>
+
+  <div class="flow"><span class="dn">▼</span><span class="fl">synthesized &amp; stored into</span><span class="dn">▼</span></div>
+
+  <div class="layer" style="--lc:var(--L5)">
+    <div class="lh"><span class="lnum">L5</span><span class="lt">Knowledge Synthesis</span><span class="ls">durable, queryable memory beyond local files</span></div>
+    <div class="chips">
+      <span class="chip"><b>Google Drive</b> <span class="sm">11 sector subfolders · one file/ticker</span></span>
+      <span class="chip"><b>NotebookLM</b> <span class="sm">24 notebooks · 1,071 sources · blind-spot Q&amp;A</span></span>
+      <span class="chip"><b>reports/</b> <span class="sm">living dossiers — TICKER_research.md</span></span>
+      <span class="chip"><b>briefs/</b> <span class="sm">dated snapshots + HTML artifacts</span></span>
+    </div>
+  </div>
+
+  <div class="flow"><span class="dn">▼</span><span class="fl">surfaced to you as</span><span class="dn">▼</span></div>
+
+  <div class="layer" style="--lc:var(--L6)">
+    <div class="lh"><span class="lnum">L6</span><span class="lt">Outputs / Surfaces</span><span class="ls">where decisions actually get made</span></div>
+    <div class="chips">
+      <span class="chip"><b>Liquidity Dashboard</b> <span class="sm">15 tabs · localhost:5175</span></span>
+      <span class="chip"><b>LINE alerts</b> <span class="sm">push · clusters · zone crosses</span></span>
+      <span class="chip"><b>Morning / Afternoon / Evening briefs</b></span>
+      <span class="chip"><b>Obsidian DASHBOARD.md</b> <span class="sm">Dataview · live prices 08:40</span></span>
+      <span class="chip"><b>Dossiers &amp; slide decks</b></span>
+    </div>
+  </div>
+
+  <p class="legend">
+    <span><span class="sw" style="background:var(--L1)"></span>L1 Sources</span>
+    <span><span class="sw" style="background:var(--L2)"></span>L2 Automation</span>
+    <span><span class="sw" style="background:var(--L3)"></span>L3 Memory</span>
+    <span><span class="sw" style="background:var(--L4)"></span>L4 Analysis</span>
+    <span><span class="sw" style="background:var(--L5)"></span>L5 Synthesis</span>
+    <span><span class="sw" style="background:var(--L6)"></span>L6 Outputs</span>
+  </p>
+
+  <!-- ============ ZOOM 1: PROCUREMENT ============ -->
+  <h2><span class="n">⊕</span> Zoom-in — Procurement: three layers fused into one signal</h2>
+  <p>Thai government contract wins are an early revenue tell. No single source is both fast <i>and</i> trustworthy, so three feeds with different latency/confidence are merged and cross-confirmed.</p>
+  <div class="panel">
+    <div class="tri">
+      <div class="col">
+        <span class="tag" style="background:var(--green)">FAST</span>
+        <h4>SET Award News</h4>
+        <p>Google News RSS scrape, matched to listed companies + subsidiaries.</p>
+        <p class="lat" style="color:var(--green)">Same-day · un-gated</p>
+        <p class="mono" style="font-size:10.5px">→ set_award_feed.json</p>
+      </div>
+      <div class="col">
+        <span class="tag" style="background:var(--amber)">FRESH</span>
+        <h4>Official e-GP</h4>
+        <p>Chrome remote-debug through Turnstile; live winners list (GMAN, 9:00 &amp; 17:00).</p>
+        <p class="lat" style="color:var(--amber)">Live · ~10-min session TTL</p>
+        <p class="mono" style="font-size:10.5px">→ egp_official_winners.json</p>
+      </div>
+      <div class="col">
+        <span class="tag" style="background:var(--cyan)">AUTH</span>
+        <h4>govspending API</h4>
+        <p>Authoritative open-data backfill, value-filtered (≥฿50M).</p>
+        <p class="lat" style="color:var(--cyan)">~6–7 week lag</p>
+        <p class="mono" style="font-size:10.5px">→ gprocurement_feed.json</p>
+      </div>
+    </div>
+    <div class="fuse">
+      <span class="dn">▼ &nbsp; ▼ &nbsp; ▼</span>
+      <div class="box"><b>procurement_store.py</b> — SQLite event store · dedupe · cross-layer confirm (project ID + TIN) · materiality vs revenue</div>
+      <div class="out">
+        <div class="o">📊 Dashboard <span class="mono" style="font-size:11px">Fast-Alerts panel</span></div>
+        <div class="o">📱 LINE push <span class="mono" style="font-size:11px">tracked tickers</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ZOOM 2: GATES ============ -->
+  <h2><span class="n">⊕</span> Zoom-in — The /analyze 8-step gate pipeline</h2>
+  <p>An idea must pass through every gate. Each one can downgrade or kill it before it ever reaches the watchlist.</p>
+  <div class="panel">
+    <div class="gates">
+      <div class="gate"><span class="g">1</span><div class="gt">Coverage check</div><div class="gd">index + new vs update</div></div>
+      <div class="garrow">›</div>
+      <div class="gate"><span class="g">2</span><div class="gt">NLM baseline</div><div class="gd">notebooks first</div></div>
+      <div class="garrow">›</div>
+      <div class="gate"><span class="g">3</span><div class="gt">Cross-sector</div><div class="gd">adjacency sweep</div></div>
+      <div class="garrow">›</div>
+      <div class="gate"><span class="g">4</span><div class="gt">Web delta</div><div class="gd">fill only gaps</div></div>
+      <div class="garrow">›</div>
+      <div class="gate"><span class="g">5</span><div class="gt">Minervini</div><div class="gd">Stage 2 · TT 8/8 · VCP</div></div>
+      <div class="garrow">›</div>
+      <div class="gate"><span class="g">6</span><div class="gt">Mistake-log</div><div class="gd">pattern match</div></div>
+      <div class="garrow">›</div>
+      <div class="gate"><span class="g">7</span><div class="gt">Conviction/size</div><div class="gd">rubric + RR + opp cost</div></div>
+      <div class="garrow">›</div>
+      <div class="gate"><span class="g">8</span><div class="gt">Journal</div><div class="gd">thesis + exit trigger</div></div>
+    </div>
+    <p style="margin:14px 0 0;font-size:12.5px;color:var(--muted)">Output = 18-section dossier + 10-point closing summary (exec summary · conviction · RR · opportunity cost · entry zone · bear · bull · key numbers · monitoring · walk-away). Then Drive + NLM sync, index + watchlist update.</p>
+  </div>
+
+  <!-- ============ ZOOM 3: DAILY TIMELINE ============ -->
+  <!-- ============ ZOOM: KNOWLEDGE LOOP ============ -->
+  <h2><span class="n">⊕</span> Zoom-in — The Knowledge Loop: beliefs, narrators, edges (added 2026-07)</h2>
+  <p>Research that only lives in dossiers decays. The knowledge loop compounds it: every serious document is distilled
+  into <b>belief files</b> holding <b>dated, falsifiable claims</b>; every recurring author is <b>graded</b>; every repeatable
+  insight becomes a <b>codified edge</b>. The mosaic now outweighs raw fundamentals in the conviction rubric.</p>
+  <div class="panel">
+    <div class="tri">
+      <div class="col">
+        <span class="tag" style="background:var(--accent)">DISTILL</span>
+        <h4>/digest → beliefs/*.md</h4>
+        <p>12-author Substack fan-out + Capital Wars corpus + primary filings → 3 belief files (global liquidity · optics/CPO · power semis), each a mechanism map + claims ledger.</p>
+        <p class="mono" style="font-size:10.5px">→ 30+ dated claims · contested-questions register</p>
+      </div>
+      <div class="col">
+        <span class="tag" style="background:var(--amber)">SCORE</span>
+        <h4>belief_checkpoints.py</h4>
+        <p>Every claim carries a horizon; the checkpoint engine surfaces past-due claims in <code>doctor.py</code> so beliefs get scored right/wrong — not quietly forgotten.</p>
+        <p class="mono" style="font-size:10.5px">→ claims scored at horizon · beliefs updated ≤30d</p>
+      </div>
+      <div class="col">
+        <span class="tag" style="background:var(--green)">GRADE</span>
+        <h4>expert_ledger + edge_log</h4>
+        <p>12 narrators rated for reliability by domain; disagreements logged as spreads with arbiters. Repeatable patterns become numbered edges (e.g. derived-demand lag, commitments-attach).</p>
+        <p class="mono" style="font-size:10.5px">→ 7 codified edges · narrator spreads w/ dated arbiters</p>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="n">⊕</span> Zoom-in — A day in the machine (Bangkok time)</h2>
+  <p>Fourteen launchd jobs run unattended, staggered so Chrome-driven harvests never collide on port 9222.</p>
+  <div class="panel">
+    <div class="rail">
+      <div class="row"><div class="tm">06:30</div><div class="dot" style="--dc:var(--purple)"></div><div class="ev"><span class="n">Smart Money</span> <span class="tk tk-ins">INSIDER</span><div class="m">US Form 4 + superinvestors → cluster/large-buy LINE alerts</div></div></div>
+      <div class="row"><div class="tm">08:40</div><div class="dot" style="--dc:var(--teal)"></div><div class="ev"><span class="n">ThaiVI Refresh</span> <span class="tk tk-sig">SIGNAL</span> &nbsp; + &nbsp; <span class="n">Obsidian Price Refresh</span> <span class="tk tk-sys">SYS</span><div class="m">Crowd backtest → signals · Yahoo quotes → ~690 dossier frontmatters (currency-guarded) so the Obsidian cockpit reads live</div></div></div>
+      <div class="row"><div class="tm">09:00</div><div class="dot" style="--dc:var(--accent)"></div><div class="ev"><span class="n">Morning Brief</span> <span class="tk tk-brief">BRIEF</span> &nbsp; + &nbsp; <span class="n">GMAN e-GP</span> <span class="tk tk-proc">PROC</span><div class="m">Macro regime + news + positions + catalysts (LINE) · official e-GP harvest #1</div></div></div>
+      <div class="row"><div class="tm">10:15</div><div class="dot" style="--dc:var(--amber)"></div><div class="ev"><span class="n">Procurement Pipeline</span> <span class="tk tk-proc">PROC</span><div class="m">News → e-GP → harvest → store ingest → alert (run 1 of 4)</div></div></div>
+      <div class="row"><div class="tm">13:00</div><div class="dot" style="--dc:var(--accent)"></div><div class="ev"><span class="n">Afternoon Brief</span> <span class="tk tk-brief">BRIEF</span> &nbsp; + &nbsp; Procurement run 2 (13:05)<div class="m">Intraday update</div></div></div>
+      <div class="row"><div class="tm">17:00</div><div class="dot" style="--dc:var(--amber)"></div><div class="ev"><span class="n">GMAN e-GP #2</span> <span class="tk tk-proc">PROC</span><div class="m">Day's awards capture</div></div></div>
+      <div class="row"><div class="tm">17:30</div><div class="dot" style="--dc:var(--cyan)"></div><div class="ev"><span class="n">gProcurement Feed</span> <span class="tk tk-proc">PROC</span> &nbsp; → &nbsp; <span class="n">SET Award News</span> (17:35)<div class="m">API backfill + same-day RSS layer (no Chrome)</div></div></div>
+      <div class="row"><div class="tm">18:00</div><div class="dot" style="--dc:var(--accent)"></div><div class="ev"><span class="n">Evening Brief</span> <span class="tk tk-brief">BRIEF</span> &nbsp; + &nbsp; <span class="n">Thai Insider</span> <span class="tk tk-ins">INSIDER</span> &nbsp; + &nbsp; Procurement run 3 (18:30)<div class="m">Day recap · Form 59 + 246-2 backfill + market-wide freshness self-heal</div></div></div>
+      <div class="row"><div class="tm">Sun 19:00</div><div class="dot" style="--dc:var(--muted)"></div><div class="ev"><span class="n">Library Catchup</span> <span class="tk tk-sys">SUN</span><div class="m">Weekly NLM new-source digest → per-sector synthesis memo</div></div></div>
+      <div class="row"><div class="tm">20:30</div><div class="dot" style="--dc:var(--amber)"></div><div class="ev"><span class="n">Procurement Pipeline</span> <span class="tk tk-proc">PROC</span><div class="m">Run 4 of 4</div></div></div>
+      <div class="row"><div class="tm">hourly</div><div class="dot" style="--dc:var(--red)"></div><div class="ev"><span class="n">Zone Alerts</span> <span class="tk tk-alert">ALERT</span><div class="m">Price band transitions NEAR / IN / BELOW + macro regime tripwires — MOVE · T10Y2Y · SOFR−2y (self-skips weekends)</div></div></div>
+      <div class="row"><div class="tm">always</div><div class="dot" style="--dc:var(--muted)"></div><div class="ev"><span class="n">Dashboard server</span> <span class="tk tk-sys">SYS</span><div class="m">Express on :5175 · RunAtLoad + KeepAlive</div></div></div>
+    </div>
+  </div>
+
+  <!-- ============ COMMAND REFERENCE ============ -->
+  <h2><span class="n">⌘</span> Command &amp; surface reference</h2>
+  <div class="two">
+    <table>
+      <tr><th>Slash command</th><th>What it does</th></tr>
+      <tr><td><code>/analyze</code></td><td>Full 18-section dossier (8 gates)</td></tr>
+      <tr><td><code>/update</code></td><td>Delta on earnings/news</td></tr>
+      <tr><td><code>/minervini</code></td><td>Stage · trend template · VCP</td></tr>
+      <tr><td><code>/challenge</code></td><td>Short-seller bear case</td></tr>
+      <tr><td><code>/decision</code></td><td>Pre-trade gate</td></tr>
+      <tr><td><code>/thaisheet</code></td><td>Thai deep financials</td></tr>
+      <tr><td><code>/portfolio</code> · <code>/watchlist</code></td><td>Position &amp; idea triage</td></tr>
+      <tr><td><code>/report</code> · <code>/slides</code></td><td>Sector report · deck prep</td></tr>
+    </table>
+    <table>
+      <tr><th>Dashboard tab</th><th>Shows</th></tr>
+      <tr><td>★ Command Deck</td><td>Is today a BUY? scorecard</td></tr>
+      <tr><td>Thai stocks · Insider Flow</td><td>Holdings + Form 59/246-2 dots</td></tr>
+      <tr><td>Global watchlist · Portfolio</td><td>Conviction · P&amp;L · sizing</td></tr>
+      <tr><td>Macro · Liquidity cycle</td><td>Regime headline · US net-liquidity proxy · Turbulence tripwires</td></tr>
+      <tr><td>Export Monitor · Rubber</td><td>MOC HS-code exports</td></tr>
+      <tr><td>Procurement Fast-Alerts</td><td>Same-day contract wins</td></tr>
+      <tr><td>ThaiVI traction · signal</td><td>Crowd buzz → forward return</td></tr>
+      <tr><td>Catalysts · Calendar · News</td><td>Events · releases · feed</td></tr>
+    </table>
+  </div>
+
+  <!-- ============ WHERE TO IMPROVE ============ -->
+  <h2><span class="n">⚒</span> Where to sharpen the machine — and why it moves the 2–3x goal</h2>
+  <p>The system is already strong at <b>collection</b> (L1–L2) and <b>synthesis</b> (L4–L5). The biggest <i>unrealized</i>
+  leverage is in the three things that convert all that activity into the actual outcome: <b>reliability of the
+  fastest signals</b>, <b>a feedback loop that proves the edge</b>, and <b>focus on the few names that can really
+  return 2–3x</b>. Honest read on the gaps, highest payoff first:</p>
+
+  <div class="imps">
+    <div class="imp" style="--pc:var(--red)">
+      <div class="ih"><span class="ttl">1 · Same-day procurement reliability</span><span class="pr" style="background:var(--red)">HIGH · ALPHA</span></div>
+      <div class="where"><span class="wl">L1 Sources</span><span class="wl">L2 Automation</span></div>
+      <div class="lab2">Gap</div>
+      <div class="gap">The fastest, most alpha-rich layer (official e-GP) is the most fragile: Turnstile-gated, ~10-min session TTL, and a dead session silently returns <b>0 rows that look like "no awards"</b> rather than an error.</div>
+      <div class="lab2">Fix</div>
+      <div class="gap">Hardened session manager — liveness probe before trusting an empty result, auto re-auth, queue + retry. The standing "solve Turnstile" task.</div>
+      <div class="lab2">→ Goal</div>
+      <div class="pay">Reliable early read on Thai contract-driven revenue = entering SET names <b>before</b> the award reaches mainstream news = a bigger slice of the move.</div>
+    </div>
+
+    <div class="imp" style="--pc:var(--red)">
+      <div class="ih"><span class="ttl">2 · Feed health / heartbeat</span><span class="pr" style="background:var(--red)">HIGH · DEFENSE</span></div>
+      <div class="where"><span class="wl">L2 Automation</span><span class="wl">L6 Outputs</span></div>
+      <div class="lab2">Gap</div>
+      <div class="gap">13 launchd jobs run blind ("a plist on disk ≠ loaded"). A failed feed just leaves <b>stale JSON</b> behind — <code>doctor.py</code> checks data consistency, not whether a job actually ran.</div>
+      <div class="lab2">Fix</div>
+      <div class="gap">A freshness/SLA health panel: last-run timestamp per feed, red when stale, LINE push on a missed run.</div>
+      <div class="lab2">→ Goal</div>
+      <div class="pay">Decisions are only as good as the data. Catching a silent feed death stops you acting on stale prices or insider flow — <b>capital preservation first</b>.</div>
+    </div>
+
+    <div class="imp" style="--pc:var(--red)">
+      <div class="ih"><span class="ttl">3 · Automated thesis-breaker tripwires</span><span class="pr" style="background:var(--red)">HIGH · DEFENSE</span></div>
+      <div class="where"><span class="wl">L3 Memory</span><span class="wl">L4 Analysis</span></div>
+      <div class="lab2">Gap</div>
+      <div class="gap"><b>Half closed:</b> macro regime tripwires (MOVE · T10Y2Y · SOFR−2y) now run live in the zone-alert engine with a Turbulence panel on the dashboard. Per-position <i>fundamental</i> breakers (margin print, utilization, customer-concentration events) in <code>thesis_monitor.md</code> are still checked manually.</div>
+      <div class="lab2">Fix</div>
+      <div class="gap">Extend the tripwire engine from macro to per-position rules — encode each dossier's breaker as a machine-checkable condition and alert the moment it trips.</div>
+      <div class="lab2">→ Goal</div>
+      <div class="pay">The #1 killer of compounding to 2–3x is <b>riding a broken thesis down</b>. Automated breakers force the exit on time.</div>
+    </div>
+
+    <div class="imp" style="--pc:var(--amber)">
+      <div class="ih"><span class="ttl">4 · Conviction calibration loop</span><span class="pr" style="background:var(--amber)">MED · EDGE</span></div>
+      <div class="where"><span class="wl">L4 Analysis</span><span class="wl">L6 Outputs</span></div>
+      <div class="lab2">Gap</div>
+      <div class="gap"><b>Measurement now exists:</b> <code>decision_outcomes.py</code> scores hit-rate + alpha per decision class vs SPX/TDEX. Still open: the result doesn't yet flow back into the sizing rubric automatically, and the mistake-log is still qualitative.</div>
+      <div class="lab2">Fix</div>
+      <div class="gap">Close the loop: feed the scorecard's per-bucket results back into <code>position_sizing_rules.md</code> on a schedule.</div>
+      <div class="lab2">→ Goal</div>
+      <div class="pay">Turns the journal into a <b>measured edge</b>. Better position sizing is the single biggest lever on getting to 2–3x.</div>
+    </div>
+
+    <div class="imp" style="--pc:var(--amber)">
+      <div class="ih"><span class="ttl">5 · Idea triage funnel</span><span class="pr" style="background:var(--amber)">MED · FOCUS</span></div>
+      <div class="where"><span class="wl">L1→L4</span></div>
+      <div class="lab2">Gap</div>
+      <div class="gap">~177 Thai + ~249 global names, but <code>/analyze</code> is deep and slow — analyst time is the bottleneck and there's no scored pre-filter pointing it at the best names.</div>
+      <div class="lab2">Fix</div>
+      <div class="gap">A lightweight pre-screen (Minervini stage + valuation gap + catalyst proximity + insider/crowd signal) that ranks the backlog.</div>
+      <div class="lab2">→ Goal</div>
+      <div class="pay"><b>Quality over quantity</b> — concentrate scarce deep-dive time on the few names that can really deliver 2–3x; stop spending cycles on the rest.</div>
+    </div>
+
+    <div class="imp" style="--pc:var(--accent)">
+      <div class="ih"><span class="ttl">6 · One canonical live price</span><span class="pr" style="background:var(--accent)">FOUNDATION</span></div>
+      <div class="where"><span class="wl">L3 Memory</span><span class="wl">L6 Outputs</span></div>
+      <div class="lab2">Gap</div>
+      <div class="gap"><b>Obsidian leg CLOSED (2026-07-04):</b> <code>obsidian_price_refresh.py</code> writes currency-guarded live quotes into ~690 dossiers daily at 08:40 — the cockpit's "In Buy Zone NOW" is genuinely live. Remaining: zone-alerts and <code>minervini_cache</code> still fetch on their own cadence.</div>
+      <div class="lab2">Fix</div>
+      <div class="gap">Fold the remaining two feeds onto the same fetcher so every surface reads one price.</div>
+      <div class="lab2">→ Goal</div>
+      <div class="pay">The cardinal rule — <b>never enter above the buy zone</b> — only holds if every surface shows the <i>same</i> live price. Removes mis-timed or missed entries.</div>
+    </div>
+  </div>
+
+  <div class="also">
+    <b>Also on the radar (smaller, but real):</b> &nbsp;• NLM source hygiene — 1,100+ sources, ~34 still undigested &nbsp;• wire the ThaiVI crowd signal into the Command Deck conviction score &nbsp;• digest SemiAnalysis 800VDC Part&nbsp;2 (the known #1 gap in the power-semis belief file) + the queued second passes (IA · SA · JC) &nbsp;• date the 5 belief-file claims with unparseable horizons so the checkpoint engine can score them.
+  </div>
+
+  <p class="legend" style="margin-top:14px">
+    <span><span class="sw" style="background:var(--red)"></span>HIGH — do first (alpha or capital at stake)</span>
+    <span><span class="sw" style="background:var(--amber)"></span>MED — sharpens the edge</span>
+    <span><span class="sw" style="background:var(--accent)"></span>FOUNDATION — discipline plumbing</span>
+  </p>
+
+  <div class="foot">
+    <b>Paewrblue OS — System Blueprint.</b> Self-contained artifact (no external assets). Generated 2026-06-25, revised 2026-07-06 from CLAUDE.md, the launchd schedule, the skill pipeline, the knowledge-loop (belief files + expert ledger), and the dashboard endpoint/tab inventory.<br>
+    Read flow top-to-bottom: <b style="color:var(--L1)">raw signal</b> → <b style="color:var(--L2)">automation</b> → <b style="color:var(--L3)">memory</b> → <b style="color:var(--L4)">analysis</b> → <b style="color:var(--L5)">synthesis</b> → <b style="color:var(--L6)">decisions</b>. The Core Loop is the spine that ties them together.
+  </div>
+
+</div>
+</body>
+</html>
