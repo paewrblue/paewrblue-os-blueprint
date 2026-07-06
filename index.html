@@ -160,10 +160,10 @@
     <p class="sub">A personal investment operating system · Bangkok (UTC+7) · US · Canada · Australia · Thailand (SET)</p>
     <div class="pills">
       <div class="pill"><div class="k">Automation scripts</div><div class="v">~80</div></div>
-      <div class="pill"><div class="k">launchd jobs</div><div class="v">14</div></div>
+      <div class="pill"><div class="k">launchd jobs</div><div class="v">15</div></div>
       <div class="pill"><div class="k">NLM notebooks</div><div class="v">25</div></div>
       <div class="pill"><div class="k">NLM sources</div><div class="v">1,100+</div></div>
-      <div class="pill"><div class="k">Dashboard tabs</div><div class="v">15</div></div>
+      <div class="pill"><div class="k">Dashboard tabs</div><div class="v">16</div></div>
       <div class="pill"><div class="k">API endpoints</div><div class="v">30+</div></div>
       <div class="pill"><div class="k">Target</div><div class="v" style="font-size:15px">2–3x · 1–2 yr</div></div>
     </div>
@@ -217,13 +217,14 @@
   <div class="flow"><span class="dn">▼</span><span class="fl">pulled on a schedule by</span><span class="dn">▼</span></div>
 
   <div class="layer" style="--lc:var(--L2)">
-    <div class="lh"><span class="lnum">L2</span><span class="lt">Automation / Pipeline</span><span class="ls">~80 scripts · 14 launchd jobs · all times Bangkok</span></div>
+    <div class="lh"><span class="lnum">L2</span><span class="lt">Automation / Pipeline</span><span class="ls">~80 scripts · 15 launchd jobs · all times Bangkok</span></div>
     <div class="cgroup"><div class="gl">Daily intelligence</div><div class="chips">
       <span class="chip"><b>smart_money.py</b> <span class="sm">06:30 · US insiders</span></span>
       <span class="chip"><b>thaivi_refresh.sh</b> <span class="sm">08:40 · crowd signal</span></span>
       <span class="chip"><b>morning_brief.py</b> <span class="sm">09:00 / 13:00 / 18:00</span></span>
       <span class="chip"><b>insider_daily.sh</b> <span class="sm">18:00 · Form 59/246-2</span></span>
       <span class="chip"><b>zone_alerts.py</b> <span class="sm">hourly · band crosses</span></span>
+      <span class="chip"><b>mg_scan.py</b> <span class="sm">17:15 · Money Game full-universe scan</span></span>
     </div></div>
     <div class="cgroup"><div class="gl">Procurement harvest</div><div class="chips">
       <span class="chip"><b>gman_egp.sh</b> <span class="sm">09:00 & 17:00 · Chrome</span></span>
@@ -423,7 +424,7 @@
   </div>
 
   <h2><span class="n">⊕</span> Zoom-in — A day in the machine (Bangkok time)</h2>
-  <p>Fourteen launchd jobs run unattended, staggered so Chrome-driven harvests never collide on port 9222.</p>
+  <p>Fifteen launchd jobs run unattended, staggered so Chrome-driven harvests never collide on port 9222.</p>
   <div class="panel">
     <div class="rail">
       <div class="row"><div class="tm">06:30</div><div class="dot" style="--dc:var(--purple)"></div><div class="ev"><span class="n">Smart Money</span> <span class="tk tk-ins">INSIDER</span><div class="m">US Form 4 + superinvestors → cluster/large-buy LINE alerts</div></div></div>
@@ -432,6 +433,7 @@
       <div class="row"><div class="tm">10:15</div><div class="dot" style="--dc:var(--amber)"></div><div class="ev"><span class="n">Procurement Pipeline</span> <span class="tk tk-proc">PROC</span><div class="m">News → e-GP → harvest → store ingest → alert (run 1 of 4)</div></div></div>
       <div class="row"><div class="tm">13:00</div><div class="dot" style="--dc:var(--accent)"></div><div class="ev"><span class="n">Afternoon Brief</span> <span class="tk tk-brief">BRIEF</span> &nbsp; + &nbsp; Procurement run 2 (13:05)<div class="m">Intraday update</div></div></div>
       <div class="row"><div class="tm">17:00</div><div class="dot" style="--dc:var(--amber)"></div><div class="ev"><span class="n">GMAN e-GP #2</span> <span class="tk tk-proc">PROC</span><div class="m">Day's awards capture</div></div></div>
+      <div class="row"><div class="tm">17:15</div><div class="dot" style="--dc:var(--teal)"></div><div class="ev"><span class="n">Money Game Scan</span> <span class="tk tk-sig">SIGNAL</span><div class="m">Full SET universe (~863 names) → ignition/stalk/warning tiers → Money Game tab + /api/mg</div></div></div>
       <div class="row"><div class="tm">17:30</div><div class="dot" style="--dc:var(--cyan)"></div><div class="ev"><span class="n">gProcurement Feed</span> <span class="tk tk-proc">PROC</span> &nbsp; → &nbsp; <span class="n">SET Award News</span> (17:35)<div class="m">API backfill + same-day RSS layer (no Chrome)</div></div></div>
       <div class="row"><div class="tm">18:00</div><div class="dot" style="--dc:var(--accent)"></div><div class="ev"><span class="n">Evening Brief</span> <span class="tk tk-brief">BRIEF</span> &nbsp; + &nbsp; <span class="n">Thai Insider</span> <span class="tk tk-ins">INSIDER</span> &nbsp; + &nbsp; Procurement run 3 (18:30)<div class="m">Day recap · Form 59 + 246-2 backfill + market-wide freshness self-heal</div></div></div>
       <div class="row"><div class="tm">Sun 19:00</div><div class="dot" style="--dc:var(--muted)"></div><div class="ev"><span class="n">Library Catchup</span> <span class="tk tk-sys">SUN</span><div class="m">Weekly NLM new-source digest → per-sector synthesis memo</div></div></div>
@@ -464,6 +466,7 @@
       <tr><td>Export Monitor · Rubber</td><td>MOC HS-code exports</td></tr>
       <tr><td>Procurement Fast-Alerts</td><td>Same-day contract wins</td></tr>
       <tr><td>ThaiVI traction · signal</td><td>Crowd buzz → forward return</td></tr>
+      <tr><td>Money Game</td><td>Volume-pressure tiers: ignition · stalk · distribution</td></tr>
       <tr><td>Catalysts · Calendar · News</td><td>Events · releases · feed</td></tr>
     </table>
   </div>
